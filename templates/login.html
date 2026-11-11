@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meet2Act AI | Sign in</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;font:15px/1.5 Inter,system-ui,sans-serif;color:#14234d;background:#eef3fd}
+.left{background:linear-gradient(160deg,#0a1a4d 0%,#1639b8 60%,#2f6df0 100%);color:#fff;padding:44px 56px;display:flex;flex-direction:column;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:48px;height:48px;border-radius:12px;background:#fff;color:#1d4fd7;font-weight:800;font-size:1.5rem;display:grid;place-items:center}
+.brand b{font-size:1.25rem;display:block;line-height:1.2}.brand small{color:#a9bdf5}
+.eyebrow{font-size:.72rem;letter-spacing:.16em;font-weight:800;color:#a9bdf5;text-transform:uppercase}
+h1{font-size:3rem;line-height:1.1;margin:12px 0 16px;letter-spacing:-.03em}
+.lead{color:#d5e0fb;max-width:480px}
+.feat{display:flex;gap:14px;margin-top:22px}
+.feat i{font-style:normal;font-weight:800;font-size:.8rem;width:40px;height:40px;border:1px solid rgba(255,255,255,.35);border-radius:10px;display:grid;place-items:center;flex:none}
+.feat b{display:block}.feat span{color:#c4d3f8;font-size:.9rem}
+.right{display:grid;place-items:center;padding:32px}
+.card{width:100%;max-width:430px;background:#fff;border-radius:20px;padding:40px;box-shadow:0 18px 50px rgba(20,35,77,.14)}
+.card h2{font-size:2rem;margin:6px 0 2px;letter-spacing:-.02em}
+.sub{color:#5a6a94;margin:0 0 18px}
+label{display:block;font-weight:600;font-size:.88rem;margin:14px 0 6px}
+input[type=text],input[type=email],input[type=password]{width:100%;font:inherit;padding:13px 14px;border:1px solid #d5ddf5;border-radius:10px;background:#f1f5fd}
+:focus-visible{outline:2px solid #1d4fd7;outline-offset:2px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:.85rem;color:#5a6a94}
+.row a{color:#1d4fd7;text-decoration:none;cursor:pointer}
+button.main{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:linear-gradient(90deg,#2f80f0,#1d4fd7);color:#fff;font:600 1rem Inter,sans-serif;cursor:pointer}
+button.main:disabled{opacity:.6}
+.or{text-align:center;color:#9aa6c8;font-size:.75rem;margin:18px 0 10px}
+.alt{text-align:center;color:#5a6a94;font-size:.9rem}.alt a{color:#1d4fd7;font-weight:600;cursor:pointer}
+#err{color:#d6303c;font-size:.88rem;min-height:1.3em;margin:10px 0 0}
+@media (max-width:860px){body{grid-template-columns:1fr}.left{padding:28px}h1{font-size:2.1rem}.feat{display:none}}
+</style>
+</head>
+<body>
+<section class="left">
+  <div class="brand"><div class="logo">M</div><div><b>Meet2Act AI</b><small>Meeting &amp; Action Tracker</small></div></div>
+  <div>
+    <div class="eyebrow">AI-powered meeting intelligence</div>
+    <h1>Turn Meetings Into Action.</h1>
+    <p class="lead">Record, analyze and track your meetings with AI-powered summaries, action items, deadlines and intelligent task tracking.</p>
+    <div class="feat"><i>01</i><div><b>AI Meeting Summary</b><span>Automatically generate concise meeting summaries.</span></div></div>
+    <div class="feat"><i>02</i><div><b>Smart Action Tracking</b><span>Identify tasks and assign responsible participants.</span></div></div>
+    <div class="feat"><i>03</i><div><b>Intelligent Reminders</b><span>Track deadlines and receive important reminders.</span></div></div>
+  </div>
+  <span></span>
+</section>
+<section class="right">
+  <form class="card" id="f">
+    <div class="eyebrow" style="color:#1d4fd7" id="eb">Account login</div>
+    <h2 id="ttl">Welcome Back</h2>
+    <p class="sub" id="sub">Sign in to continue to Meet2Act AI.</p>
+    <div id="nm" hidden><label for="name">Full Name</label><input id="name" type="text" autocomplete="name"></div>
+    <label for="email">Email Address</label>
+    <input id="email" type="email" autocomplete="email" required>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" required minlength="6">
+    <div class="row"><label style="margin:0;font-weight:400"><input type="checkbox" id="rem"> Remember me</label><a id="fp">Forgot password?</a></div>
+    <p id="err" role="alert"></p>
+    <button class="main" id="go">Sign In</button>
+    <div class="or">OR</div>
+    <div class="alt"><span id="q">Don't have an account?</span> <a id="sw">Create Account</a></div>
+  </form>
+</section>
+<script>
+const LIVE=location.port!=="5000",API=LIVE?`http://${location.hostname}:5000`:"",go=p=>LIVE?(p==="/"?"index.html":"login.html"):p;
+const _f=window.fetch;window.fetch=(u,o={})=>_f(typeof u==="string"&&u.startsWith("/api")?API+u:u,{credentials:"include",...o});
+let mode="login";const $=id=>document.getElementById(id);
+function setMode(m){mode=m;const r=m==="register";
+  $("eb").textContent=r?"New account":"Account login";$("ttl").textContent=r?"Create Account":"Welcome Back";
+  $("sub").textContent=r?"Start turning meetings into action.":"Sign in to continue to Meet2Act AI.";
+  $("nm").hidden=!r;$("go").textContent=r?"Create Account":"Sign In";
+  $("q").textContent=r?"Already have an account?":"Don't have an account?";$("sw").textContent=r?"Sign In":"Create Account";$("err").textContent=""}
+$("sw").onclick=()=>setMode(mode==="login"?"register":"login");
+$("fp").onclick=()=>{$("err").textContent="Password reset isn't available yet. Create a new account if needed."};
+$("f").onsubmit=async e=>{
+  e.preventDefault();$("err").textContent="";$("go").disabled=true;
+  try{
+    const r=await fetch("/api/"+mode,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:$("name").value,email:$("email").value,password:$("pw").value,remember:$("rem").checked})});
+    if(r.ok)return location=go("/");
+    const d=await r.json().catch(()=>({}));
+    $("err").textContent=d.error||"Server error. Check the terminal for details.";
+  }catch(x){$("err").textContent="Cannot reach the server. Is py app.py running?"}
+  $("go").disabled=false;
+};
+</script>
+</body>
+</html>

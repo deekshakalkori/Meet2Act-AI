@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meet2Act AI | Meeting Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
+<style>
+:root{--blue:#1d4fd7;--bg:#eef3fd;--ink:#14234d;--muted:#5a6a94;--line:#dbe3f6;--red:#d6303c;--amber:#e6a100;--green:#14966a}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.side{background:linear-gradient(180deg,#0a1a4d,#102a7d);color:#cfd9f6;padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{display:flex;gap:10px;align-items:center;padding:0 8px 22px}
+.logo{width:42px;height:42px;border-radius:11px;background:var(--blue);color:#fff;font-weight:800;font-size:1.3rem;display:grid;place-items:center;flex:none}
+.brand b{color:#fff;display:block;line-height:1.2}.brand b span{color:#6fa0ff}.brand small{color:#8fa8e8}
+nav button{width:100%;text-align:left;background:none;border:0;color:#cfd9f6;font:inherit;padding:11px 14px;border-radius:10px;cursor:pointer;margin:1px 0}
+nav button:hover{background:rgba(255,255,255,.08)}nav button.on{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
+.priv{margin-top:auto;background:rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;font-size:.85rem}
+.priv small{display:block;color:#9db3ee}
+.user{display:flex;gap:10px;align-items:center;padding:14px 6px 0}
+.user b{color:#fff;display:block;line-height:1.2}.user small{color:#8fa8e8}
+.av{width:38px;height:38px;border-radius:50%;background:#3b63e0;color:#fff;font-weight:600;display:grid;place-items:center;flex:none}
+.so{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.3);color:#cfd9f6;border-radius:8px;padding:4px 9px;cursor:pointer;font:inherit;font-size:.8rem}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;font-weight:600;border-bottom:1px solid var(--line)}
+main{padding:24px 32px 48px;max-width:1200px}
+h1{margin:0;font-size:1.9rem;letter-spacing:-.02em}h2{margin:0;font-size:1.1rem}
+.muted{color:var(--muted)}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:20px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:11px 18px;font:600 .95rem Inter,sans-serif;cursor:pointer}
+.btn:disabled{opacity:.6}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.panel,.stat{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px rgba(20,35,77,.06)}
+.stat{padding:18px;display:flex;gap:14px;align-items:center}
+.ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:1.2rem;background:#e3ebfc;color:var(--blue);flex:none}
+.stat.g .ic{background:#dcf3ec;color:var(--green)}.stat.r .ic{background:#fde4e6;color:var(--red)}
+.stat small{color:var(--muted);display:block;font-size:.82rem}.stat b{font-size:1.9rem;line-height:1.1}.stat em{display:block;font-style:normal;font-size:.75rem;color:var(--muted)}
+.cols{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
+.panel{padding:20px}.panel>.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.ph a{color:var(--blue);font-size:.85rem;cursor:pointer}
+.item{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}.item b{display:block}.item small{color:var(--muted)}
+.item .r{margin-left:auto;font-size:.82rem;color:var(--muted);white-space:nowrap}.item .r.late{color:var(--red);font-weight:600}
+.mi{width:40px;height:40px;border-radius:10px;background:#e3ebfc;display:grid;place-items:center;flex:none}
+.ai{margin-top:16px;display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.ai .ic{background:linear-gradient(135deg,#4f7cf0,#7a5af0);color:#fff}.ai a{margin-left:auto;color:var(--blue);font-weight:600;cursor:pointer;font-size:.9rem}
+.empty{color:var(--muted);padding:14px 0}
+label{display:block;font-weight:600;font-size:.88rem;margin:14px 0 5px}
+input,textarea,select{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#f6f8fe;color:inherit}
+textarea{min-height:140px;resize:vertical}:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.form{max-width:640px}
+.avail{margin-top:12px;font-size:.9rem;min-height:1.3em}.avail.ok{color:var(--green)}.avail.bad{color:var(--red);font-weight:600}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.col{background:#e4ecfb;border-radius:14px;padding:12px;min-height:140px}.col h3{margin:2px 4px 10px;font-size:.95rem}
+.card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:11px;margin-bottom:9px}
+.card.late{border-left-color:var(--red)}.card p{margin:0 0 4px;font-weight:600}.card small{display:block;color:var(--muted);margin-bottom:8px}
+.card select{padding:5px 8px;font-size:.85rem}
+.mt{margin-bottom:14px}.mt h2{margin-bottom:2px}.mt ul{margin:6px 0 0;padding-left:20px}
+.plain{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit;font-size:.82rem}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a1a4d;color:#fff;padding:11px 20px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none}
+#toast.on{opacity:1}
+@media (max-width:900px){.app{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}.brand{padding:0}
+nav{display:flex;flex-wrap:wrap}.priv,.user small{display:none}.user{padding:0;margin-left:auto}.stats{grid-template-columns:1fr 1fr}.cols,.board,.g3{grid-template-columns:1fr}main,.top{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="side">
+  <div class="brand"><div class="logo">M</div><div><b>Meet2Act <span>AI</span></b><small>Meeting Intelligence</small></div></div>
+  <nav id="nav">
+   <button data-v="dash">▦&nbsp; Dashboard</button><button data-v="newm">＋&nbsp; New Meeting</button>
+   <button data-v="acts">✓&nbsp; Action Items</button><button data-v="hist">◷&nbsp; Meeting History</button>
+   <button data-v="ask">✦&nbsp; Ask Meeting AI</button>
+  </nav>
+  <div class="priv"><b>🔒 Private Workspace</b><small>Your meeting data stays protected.</small></div>
+  <div class="user"><div class="av" id="av"></div><div><b id="uname"></b><small>Team Member</small></div><button class="so" id="out">Sign out</button></div>
+ </aside>
+ <div>
+  <div class="top"><span>AI Meeting &amp; Action Tracker</span><div class="av" id="av2"></div></div>
+  <main id="main"></main>
+ </div>
+</div>
+<div id="toast" role="status"></div>
+<script>
+const LIVE=location.port!=="5000",API=LIVE?`http://${location.hostname}:5000`:"",go=p=>LIVE?(p==="/"?"index.html":"login.html"):p;
+const _f=window.fetch;window.fetch=(u,o={})=>_f(typeof u==="string"&&u.startsWith("/api")?API+u:u,{credentials:"include",...o});
+const $=id=>document.getElementById(id),H={"Content-Type":"application/json"};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
+const TODAY=ymd(new Date());
+const rel=s=>!s?"No date":s===TODAY?"Today":s===addDays(1)?"Tomorrow":s===addDays(-1)?"Yesterday":new Date(s+"T00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"});
+let me=null,meetings=[],actions=[],view="dash";
+const COLS=[["todo","To do"],["doing","Doing"],["done","Done"]];
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),3200)}
+async function load(){
+  if(!me){const r=await fetch("/api/me");if(r.status===401)return location=go("/login");me=await r.json();
+    $("uname").textContent=me.name;$("av").textContent=$("av2").textContent=me.name[0].toUpperCase()}
+  [meetings,actions]=await Promise.all([fetch("/api/meetings").then(r=>r.json()),fetch("/api/actions").then(r=>r.json())]);
+  render();
+}
+function render(){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  $("main").innerHTML=({dash,newm,acts,hist,ask})[view]();
+  if(view==="newm")check();
+}
+const stat=(ic,l,v,s,c="")=>`<div class="stat ${c}"><div class="ic">${ic}</div><div><small>${l}</small><b>${v}</b><em>${s}</em></div></div>`;
+function dash(){
+  const open=actions.filter(a=>a.status!=="done"),done=actions.length-open.length;
+  const late=open.filter(a=>a.due&&a.due<TODAY).length,attn=open.filter(a=>a.due&&a.due<=addDays(2)).length;
+  const month=meetings.filter(m=>(m.start_time||"").slice(0,7)===TODAY.slice(0,7)).length;
+  const pct=actions.length?Math.round(done/actions.length*100):0;
+  const pri=[...open].sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")).slice(0,4);
+  const h=new Date().getHours(),g=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+  return `<div class="head"><div><h1>${g}, ${esc(me.name.split(" ")[0])} 👋</h1><p class="muted" style="margin:4px 0 0">Turn meetings into clear actions and measurable progress.</p></div>
+  <button class="btn" data-v="newm">＋ New Meeting</button></div>
+  <div class="stats">${stat("🎙","Total Meetings",meetings.length,`+${month} this month`)}${stat("✓","Action Items",actions.length,`${attn} need attention`)}
+  ${stat("✔","Completed",done,`${pct}% completion`,"g")}${stat("!","Overdue",late,"Needs follow-up","r")}</div>
+  <div class="cols"><div class="panel"><div class="ph"><div><h2>Priority Action Items</h2><small class="muted">Tasks that need your attention</small></div><a data-v="acts">View all →</a></div>
+  ${pri.map(a=>{const l=a.due&&a.due<TODAY;return `<div class="item"><span class="dot" style="background:${l||(a.due&&a.due<=addDays(1))?"var(--red)":"var(--amber)"}"></span>
+  <div><b>${esc(a.task)}</b><small>${esc(a.meeting)}</small></div><span class="r ${l?"late":""}">${l?"Overdue":rel(a.due)}</span></div>`}).join("")||'<p class="empty">No open action items.</p>'}</div>
+  <div class="panel"><div class="ph"><div><h2>Recent Meetings</h2><small class="muted">Your latest meetings</small></div><a data-v="hist">View all →</a></div>
+  ${meetings.slice(0,3).map(m=>`<div class="item"><div class="mi">🗓</div><div><b>${esc(m.title)}</b><small>${rel((m.start_time||"").slice(0,10))} · ${m.n_actions} action items</small></div></div>`).join("")||'<p class="empty">No meetings yet.</p>'}</div></div>
+  <div class="ai"><div class="ic">✦</div><div><b>Meet2Act AI found ${attn} task${attn===1?"":"s"} that need attention.</b><br><small class="muted">Review deadlines and keep your team on track.</small></div><a data-v="acts">Review Tasks</a></div>`;
+}
+function newm(){
+  const locs=[...new Set(meetings.map(m=>m.location))];
+  return `<div class="head"><div><h1>New Meeting</h1><p class="muted" style="margin:4px 0 0">Choose a location and time. We'll tell you if it's already booked.</p></div></div>
+  <div class="panel form"><label for="title">Meeting title</label><input id="title" placeholder="Project Expo Planning">
+  <label for="loc">Location</label><input id="loc" list="locs" placeholder="e.g. Conference Hall" autocomplete="off"><datalist id="locs">${locs.map(l=>`<option value="${esc(l)}">`).join("")}</datalist>
+  <div class="g3"><div><label for="date">Date</label><input id="date" type="date" value="${TODAY}"></div>
+  <div><label for="start">Starts</label><input id="start" type="time" value="10:00"></div><div><label for="end">Ends</label><input id="end" type="time" value="11:00"></div></div>
+  <div class="avail" id="avail" role="status"></div>
+  <label for="tx">Transcript or notes (optional)</label><textarea id="tx" placeholder="Paste what was said. Example: Asha will send the budget by 2026-11-14."></textarea>
+  <button class="btn" id="sub" style="margin-top:16px">Schedule Meeting</button><div class="avail" id="msg" role="status"></div></div>`;
+}
+async function check(){
+  const loc=$("loc").value.trim(),d=$("date").value,s=$("start").value,e=$("end").value,o=$("avail");
+  if(!loc||!d||!s||!e||e<=s){o.textContent="";o.className="avail";return}
+  const j=await fetch(`/api/check?location=${encodeURIComponent(loc)}&start=${d}T${s}&end=${d}T${e}`).then(r=>r.json());
+  o.className="avail "+(j.available?"ok":"bad");o.textContent=(j.available?"✓ ":"⚠ ")+j.message;
+}
+async function save(){
+  const v=id=>$(id).value.trim(),msg=$("msg");msg.className="avail";msg.textContent="Scheduling…";$("sub").disabled=true;
+  const r=await fetch("/api/meetings",{method:"POST",headers:H,body:JSON.stringify({title:v("title"),location:v("loc"),transcript:$("tx").value,
+    start_time:v("date")+"T"+v("start"),end_time:v("date")+"T"+v("end")})});
+  const d=await r.json().catch(()=>({}));$("sub").disabled=false;
+  if(!r.ok){msg.className="avail bad";msg.textContent="⚠ "+(d.error||"Something went wrong.");return}
+  toast(d.used_ai===false?"Scheduled. Set ANTHROPIC_API_KEY for AI summaries.":"Meeting scheduled");
+  await load();view="hist";render();
+}
+function acts(){
+  return `<div class="head"><div><h1>Action Items</h1><p class="muted" style="margin:4px 0 0">Move tasks across the board as work progresses.</p></div></div><div class="board">`+
+  COLS.map(([k,l])=>{const it=actions.filter(a=>a.status===k);return `<div class="col"><h3>${l} (${it.length})</h3>`+(it.map(a=>{const late=a.due&&a.due<TODAY&&k!=="done";
+  return `<div class="card ${late?"late":""}"><p>${esc(a.task)}</p><small>${esc(a.owner||"Unassigned")} · ${late?"Overdue · ":""}${esc(a.due||"No date")}<br>${esc(a.meeting)}</small>
+  <select data-id="${a.id}" aria-label="Move action item">${COLS.map(([c,t])=>`<option value="${c}"${c===k?" selected":""}>${t}</option>`).join("")}</select></div>`}).join("")||'<p class="empty">Nothing here.</p>')+`</div>`}).join("")+`</div>`;
+}
+function hist(){
+  return `<div class="head"><div><h1>Meeting History</h1><p class="muted" style="margin:4px 0 0">Every meeting with its summary and decisions.</p></div></div>`+
+  (meetings.map(m=>`<div class="panel mt"><div class="ph"><div><h2>${esc(m.title)}</h2><small class="muted">📍 ${esc(m.location)} · ${esc((m.start_time||"").replace("T"," "))}–${esc((m.end_time||"").slice(11))} · ${esc(m.organizer||"")}</small></div>
+  ${m.user_id===me.id?`<button class="plain" data-del="${m.id}">Delete</button>`:""}</div><p style="margin:8px 0 0">${esc(m.summary)||'<span class="muted">No summary added.</span>'}</p>
+  ${m.decisions.length?`<ul>${m.decisions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</div>`).join("")||'<p class="empty">No meetings yet.</p>');
+}
+function ask(){
+  return `<div class="head"><div><h1>Ask Meeting AI</h1><p class="muted" style="margin:4px 0 0">Ask anything about your meetings and tasks.</p></div></div>
+  <div class="panel form"><label for="q">Your question</label><textarea id="q" style="min-height:80px" placeholder="What did we decide about the budget? Who has overdue tasks?"></textarea>
+  <button class="btn" id="askgo" style="margin-top:12px">Ask</button><div id="ans" style="margin-top:16px;white-space:pre-wrap"></div></div>`;
+}
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-v],[data-del],#sub,#askgo,#out");if(!t)return;
+  if(t.dataset.v){view=t.dataset.v;render()}
+  else if(t.id==="sub")save();
+  else if(t.id==="out"){await fetch("/api/logout",{method:"POST"});location=go("/login")}
+  else if(t.id==="askgo"){
+    const a=$("ans");a.textContent="Thinking…";
+    const r=await fetch("/api/ask",{method:"POST",headers:H,body:JSON.stringify({question:$("q").value})});
+    const d=await r.json().catch(()=>({}));a.textContent=d.answer||d.error||"Something went wrong.";
+  }else if(t.dataset.del){
+    if(!confirm("Delete this meeting and its action items?"))return;
+    const r=await fetch("/api/meetings/"+t.dataset.del,{method:"DELETE"});
+    if(!r.ok)return alert((await r.json()).error);load();
+  }
+});
+document.addEventListener("change",async e=>{
+  if(e.target.dataset.id){await fetch("/api/actions/"+e.target.dataset.id,{method:"PATCH",headers:H,body:JSON.stringify({status:e.target.value})});load()}
+  else if(["loc","date","start","end"].includes(e.target.id))check();
+});
+document.addEventListener("input",e=>{if(e.target.id==="loc")check()});
+load();
+</script>
+</body>
+</html>
