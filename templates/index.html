@@ -49,7 +49,11 @@ input,textarea,select{width:100%;font:inherit;padding:11px 13px;border:1px solid
 textarea{min-height:140px;resize:vertical}:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.form{max-width:640px}
 .avail{margin-top:12px;font-size:.9rem;min-height:1.3em}.avail.ok{color:var(--green)}.avail.bad{color:var(--red);font-weight:600}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:1250px) and (min-width:901px){.board{grid-template-columns:1fr 1fr}}
+.bar{height:10px;background:#e3ebfc;border-radius:99px;overflow:hidden;margin:6px 0 14px}.bar i{display:block;height:100%;background:var(--blue);border-radius:99px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}.chips span{background:#f1f5fd;border-radius:99px;padding:5px 14px;font-size:.85rem}.chips b{margin-left:4px}.chips .r{color:var(--red)}
+.acts{margin:10px 0 0;padding:0;list-style:none;font-size:.88rem}.acts li{padding:6px 0;border-top:1px solid var(--line)}.acts small{color:var(--muted)}.tag{font-size:.72rem;padding:1px 8px;border-radius:99px;background:#e3ebfc;color:var(--blue);margin-left:6px}.tag.r{background:#fde4e6;color:var(--red)}.tag.g{background:#dcf3ec;color:var(--green)}
 .col{background:#e4ecfb;border-radius:14px;padding:12px;min-height:140px}.col h3{margin:2px 4px 10px;font-size:.95rem}
 .card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:11px;margin-bottom:9px}
 .card.late{border-left-color:var(--red)}.card p{margin:0 0 4px;font-weight:600}.card small{display:block;color:var(--muted);margin-bottom:8px}
@@ -90,7 +94,9 @@ const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
 const TODAY=ymd(new Date());
 const rel=s=>!s?"No date":s===TODAY?"Today":s===addDays(1)?"Tomorrow":s===addDays(-1)?"Yesterday":new Date(s+"T00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"});
 let me=null,meetings=[],actions=[],view="dash";
-const COLS=[["todo","To do"],["doing","Doing"],["done","Done"]];
+const COLS=[["todo","Pending"],["doing","In Progress"],["done","Completed"]];
+const isLate=a=>a.due&&a.due<TODAY&&a.status!=="done";
+const stName=a=>isLate(a)?"Overdue":COLS.find(c=>c[0]===a.status)[1];
 function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),3200)}
 async function load(){
   if(!me){const r=await fetch("/api/me");if(r.status===401)return location=go("/login");me=await r.json();
@@ -109,12 +115,14 @@ function dash(){
   const late=open.filter(a=>a.due&&a.due<TODAY).length,attn=open.filter(a=>a.due&&a.due<=addDays(2)).length;
   const month=meetings.filter(m=>(m.start_time||"").slice(0,7)===TODAY.slice(0,7)).length;
   const pct=actions.length?Math.round(done/actions.length*100):0;
+  const pend=actions.filter(a=>a.status==="todo"&&!isLate(a)).length,prog=actions.filter(a=>a.status==="doing"&&!isLate(a)).length;
   const pri=[...open].sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")).slice(0,4);
   const h=new Date().getHours(),g=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
   return `<div class="head"><div><h1>${g}, ${esc(me.name.split(" ")[0])} 👋</h1><p class="muted" style="margin:4px 0 0">Turn meetings into clear actions and measurable progress.</p></div>
   <button class="btn" data-v="newm">＋ New Meeting</button></div>
   <div class="stats">${stat("🎙","Total Meetings",meetings.length,`+${month} this month`)}${stat("✓","Action Items",actions.length,`${attn} need attention`)}
   ${stat("✔","Completed",done,`${pct}% completion`,"g")}${stat("!","Overdue",late,"Needs follow-up","r")}</div>
+  <div class="panel" style="margin-bottom:16px"><div class="ph"><h2>Task Progress</h2><small class="muted">${pct}% complete</small></div><div class="bar"><i style="width:${pct}%"></i></div><div class="chips"><span>Pending <b>${pend}</b></span><span>In Progress <b>${prog}</b></span><span>Completed <b>${done}</b></span><span class="r">Overdue <b>${late}</b></span></div></div>
   <div class="cols"><div class="panel"><div class="ph"><div><h2>Priority Action Items</h2><small class="muted">Tasks that need your attention</small></div><a data-v="acts">View all →</a></div>
   ${pri.map(a=>{const l=a.due&&a.due<TODAY;return `<div class="item"><span class="dot" style="background:${l||(a.due&&a.due<=addDays(1))?"var(--red)":"var(--amber)"}"></span>
   <div><b>${esc(a.task)}</b><small>${esc(a.meeting)}</small></div><span class="r ${l?"late":""}">${l?"Overdue":rel(a.due)}</span></div>`}).join("")||'<p class="empty">No open action items.</p>'}</div>
@@ -149,16 +157,19 @@ async function save(){
   await load();view="hist";render();
 }
 function acts(){
-  return `<div class="head"><div><h1>Action Items</h1><p class="muted" style="margin:4px 0 0">Move tasks across the board as work progresses.</p></div></div><div class="board">`+
-  COLS.map(([k,l])=>{const it=actions.filter(a=>a.status===k);return `<div class="col"><h3>${l} (${it.length})</h3>`+(it.map(a=>{const late=a.due&&a.due<TODAY&&k!=="done";
-  return `<div class="card ${late?"late":""}"><p>${esc(a.task)}</p><small>${esc(a.owner||"Unassigned")} · ${late?"Overdue · ":""}${esc(a.due||"No date")}<br>${esc(a.meeting)}</small>
-  <select data-id="${a.id}" aria-label="Move action item">${COLS.map(([c,t])=>`<option value="${c}"${c===k?" selected":""}>${t}</option>`).join("")}</select></div>`}).join("")||'<p class="empty">Nothing here.</p>')+`</div>`}).join("")+`</div>`;
+  const cols=[["Pending",a=>a.status==="todo"&&!isLate(a)],["In Progress",a=>a.status==="doing"&&!isLate(a)],["Completed",a=>a.status==="done"],["Overdue",isLate]];
+  return `<div class="head"><div><h1>Action Items</h1><p class="muted" style="margin:4px 0 0">Track every task from Pending to Completed.</p></div></div><div class="board">`+
+  cols.map(([l,f])=>{const it=actions.filter(f);return `<div class="col"><h3>${l} (${it.length})</h3>`+(it.map(a=>
+  `<div class="card ${isLate(a)?"late":""}"><p>${esc(a.task)}</p><small>${esc(a.owner||"Unassigned")} · ${esc(a.due||"No deadline")}<br>${esc(a.meeting)}</small>
+  <select data-id="${a.id}" aria-label="Change status">${COLS.map(([c,t])=>`<option value="${c}"${c===a.status?" selected":""}>${t}</option>`).join("")}</select></div>`).join("")||'<p class="empty">Nothing here.</p>')+`</div>`}).join("")+`</div>`;
 }
 function hist(){
-  return `<div class="head"><div><h1>Meeting History</h1><p class="muted" style="margin:4px 0 0">Every meeting with its summary and decisions.</p></div></div>`+
-  (meetings.map(m=>`<div class="panel mt"><div class="ph"><div><h2>${esc(m.title)}</h2><small class="muted">📍 ${esc(m.location)} · ${esc((m.start_time||"").replace("T"," "))}–${esc((m.end_time||"").slice(11))} · ${esc(m.organizer||"")}</small></div>
-  ${m.user_id===me.id?`<button class="plain" data-del="${m.id}">Delete</button>`:""}</div><p style="margin:8px 0 0">${esc(m.summary)||'<span class="muted">No summary added.</span>'}</p>
-  ${m.decisions.length?`<ul>${m.decisions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}</div>`).join("")||'<p class="empty">No meetings yet.</p>');
+  return `<div class="head"><div><h1>Meeting History</h1><p class="muted" style="margin:4px 0 0">Every processed meeting with its summary, decisions and tasks.</p></div></div>`+
+  (meetings.map(m=>{const ma=actions.filter(a=>a.meeting_id===m.id);return `<div class="panel mt"><div class="ph"><div><h2>${esc(m.title)}</h2><small class="muted">📍 ${esc(m.location)} · ${esc((m.start_time||"").replace("T"," "))}–${esc((m.end_time||"").slice(11))} · ${esc(m.organizer||"")}</small></div>
+  <div style="display:flex;gap:6px"><button class="plain" data-mom="${m.id}" data-name="${esc(m.title)}">⬇ Download MoM</button>${m.user_id===me.id?`<button class="plain" data-del="${m.id}">Delete</button>`:""}</div></div>
+  <p style="margin:8px 0 0">${esc(m.summary)||'<span class="muted">No summary added.</span>'}</p>
+  ${m.decisions.length?`<strong style="font-size:.88rem">Decisions</strong><ul style="margin:4px 0 0">${m.decisions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  ${ma.length?`<ul class="acts">${ma.map(a=>`<li>${esc(a.task)}<span class="tag ${isLate(a)?"r":a.status==="done"?"g":""}">${stName(a)}</span><br><small>${esc(a.owner||"Unassigned")} · ${esc(a.due||"No deadline")}</small></li>`).join("")}</ul>`:""}</div>`}).join("")||'<p class="empty">No meetings yet.</p>');
 }
 function ask(){
   return `<div class="head"><div><h1>Ask Meeting AI</h1><p class="muted" style="margin:4px 0 0">Ask anything about your meetings and tasks.</p></div></div>
@@ -166,8 +177,14 @@ function ask(){
   <button class="btn" id="askgo" style="margin-top:12px">Ask</button><div id="ans" style="margin-top:16px;white-space:pre-wrap"></div></div>`;
 }
 document.addEventListener("click",async e=>{
-  const t=e.target.closest("[data-v],[data-del],#sub,#askgo,#out");if(!t)return;
+  const t=e.target.closest("[data-v],[data-del],[data-mom],#sub,#askgo,#out");if(!t)return;
   if(t.dataset.v){view=t.dataset.v;render()}
+  else if(t.dataset.mom){
+    const r=await fetch(`/api/meetings/${t.dataset.mom}/mom`);
+    if(!r.ok){const d=await r.json().catch(()=>({}));return alert(d.error||"Could not create the report.")}
+    const u=URL.createObjectURL(await r.blob()),l=document.createElement("a");
+    l.href=u;l.download="MoM_"+(t.dataset.name||"meeting").replace(/[^\w-]+/g,"_")+".docx";l.click();URL.revokeObjectURL(u);toast("MoM report downloaded");
+  }
   else if(t.id==="sub")save();
   else if(t.id==="out"){await fetch("/api/logout",{method:"POST"});location=go("/login")}
   else if(t.id==="askgo"){
